@@ -59,7 +59,7 @@ def to_rgb(hsv) :
     alpha = hsv[3]
 
     """Chroma , X, m calculation"""
-    
+
     chroma = value * saturation
 
     y = (((hue / 60) % 2) - 1)
@@ -101,30 +101,3 @@ def to_rgb(hsv) :
     color = [red, green, blue, alpha]
 
     return color
-
-
-
-color = [128, 128, 0, 0]
-print("Olive :", color)
-color = to_hsv(color)
-print("Olive :", color)
-color = to_rgb(color)
-print("Olive :", color)
-color = [0, 0, 128, 255]
-print("Navy :", color)
-color= to_hsv(color)
-print("Navy :", color)
-color = to_rgb(color)
-print("Navy :", color)
-color = [191, 191, 191, 255]
-print("Silver :", color)
-color = to_hsv(color)
-print("Silver :", color)
-color = to_rgb(color)
-print("Silver :", color)
-color = [127, 55, 92, 255]
-print("Random :", color)
-color = to_hsv(color)
-print("Random :", color)
-color = to_rgb(color)
-print("Random :", color)
