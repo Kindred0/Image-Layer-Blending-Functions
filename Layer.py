@@ -12,13 +12,15 @@ class layer :
 
         self.image = Image.fromarray(self.rgb)
 
-        self.hsv = numpy.zeros([row, coloumn, 4])
+        self.hsl = numpy.zeros([row, coloumn, 4])
         
-        self.shape = (row, coloumn)
+        self.dimension = (row, coloumn)
 
         self.Alpha = numpy.array([])
 
         self.mode = "rgba" 
+
+        self.Opacity = 100
 
     def __init__(self, i) :
 
@@ -27,14 +29,16 @@ class layer :
 
         """ The matrix of the image in RGB """
         self.rgb = numpy.asarray(self.image)
+
+        """ Change the reading mode to read and write """
         self.rgb = self.rgb.copy()
         self.rgb.setflags(write=1)
 
         """ Dimension of the image """
-        self.shape = self.image.size
+        self.dimension = self.image.size
 
-        """ The matrix of the image in HSV """
-        self.hsv = numpy.zeros([self.shape[0], self.shape[1], 4])
+        """ The matrix of the image in HSL """
+        self.hsl = numpy.zeros([self.dimension[0], self.dimension[1], 4])
 
         """ The sparce matrix of the image of non-zero alpha's """
         self.Alpha = numpy.array([])
@@ -42,38 +46,42 @@ class layer :
         """ The type of image """
         self.mode = self.image.mode
 
-        """ Obtaining the HSV matrix from the RGB matrix """
-        for i in range(0, self.shape[0]) :
-            for k in range(0, self.shape[1]) :
-                self.hsv[i][k] = color.to_hsv(self.rgb[i][k])
+        """ Setting the opacity of the image to a full 100% , Opacity represents the transparency of the layer """
+        self.Opacity = 100
+
+        """ Obtaining the HSL matrix from the RGB matrix """
+        for i in range(0, self.dimension[0]) :
+            for k in range(0, self.dimension[1]) :
+                self.hsl[i][k] = color.RGBtoHSL(self.rgb[i][k])
 
 
 
-    """ To update the image in case the RGB matrix is transformed """
+    """ To update the image in case the RGB matrix is modified """
     def Update_image(self) :
         self.image = Image.fromarray(self.rgb)
 
 
-    """ To update the RGB matrix in case the HSV matrix is transformed """
+    """ To update the RGB matrix in case the HSL matrix is modified """
     def Update_RGB(self) :
-        for i in range(0, self.shape[0]) :
-            for k in range(0, self.shape[1]) :
-                self.rgb[i][k] = color.to_rgb(self.hsv[i][k])
+        for i in range(0, self.dimension[0]) :
+            for k in range(0, self.dimension[1]) :
+                self.rgb[i][k] = color.HSLtoRGB(self.hsl[i][k])
         self.Update_image()
 
 
-    """ To Update the HSV matrix in case the RGB matrix is transformed """
-    def Update_HSV(self) :
-        for i in range(0, self.shape[0]) :
-            for k in range(0, self.shape[1]) :
-                self.hsv[i][k] = color.to_hsv(self.rgb[i][k])
+    """ To Update the hsl matrix in case the RGB matrix is modified """
+    def Update_HSL(self) :
+        for i in range(0, self.dimension[0]) :
+            for k in range(0, self.dimension[1]) :
+                self.hsl[i][k] = color.RGBtoHSL(self.rgb[i][k])
+        self.Update_image()
 
 
     def __del__(self) :
         self.image.close()
 
 
-    def show(self) :
+    def display(self) :
         self.image.show()
 
 
@@ -84,8 +92,8 @@ class layer :
                 print(k, end= " ")
 
 
-    def show_HSV(self) :
-        for i in self.hsv :
+    def show_hsl(self) :
+        for i in self.hsl :
             print("\n\nrow\n")
             for k in i :
                 print(k, end= " ")
