@@ -1,4 +1,5 @@
 
+from multiprocessing import resource_tracker
 import Layer
 
 def addition(Upper, Base) :    
@@ -36,11 +37,17 @@ def addition(Upper, Base) :
 
                 resultant.rgb[i][k][3] = Base.rgb[i][k][3]
 
+
+            alphaB = Base.rgb[i][k][3] / 255
+            alphaU = Upper.rgb[i][k][3] / 255
+            Rinverse = 255 / resultant.rgb[i][k][3]
+
             """ The RGB channels of the resultant layer is replaced with the sum of the RGB channels of the two layers """
 
             """ Assigning Red Channel """
 
-            color = (Base.rgb[i][k][0] * (Base.rgb[i][k][3] / 255)) + (Upper.rgb[i][k][0] * (Upper.rgb[i][k][3] / 255))
+            color = Rinverse * ((Base.rgb[i][k][0] * alphaB) + (Upper.rgb[i][k][0] * alphaU))
+            color = int(color)
 
             if color > 255 :
                 color = 255
@@ -51,7 +58,8 @@ def addition(Upper, Base) :
 
             """ Assigning Green Channel """
 
-            color = (Base.rgb[i][k][1] * (Base.rgb[i][k][3] / 255)) + (Upper.rgb[i][k][1] * (Upper.rgb[i][k][3] / 255))
+            color = Rinverse * ((Base.rgb[i][k][1] * alphaB) + (Upper.rgb[i][k][1] * alphaU))
+            color = int(color)
 
             if color > 255 :
                 color = 255
@@ -62,7 +70,8 @@ def addition(Upper, Base) :
 
             """ Assigning Blue Channel """
 
-            color = (Base.rgb[i][k][2] * (Base.rgb[i][k][3] / 255)) + (Upper.rgb[i][k][2] * (Upper.rgb[i][k][3] / 255))
+            color = Rinverse * ((Base.rgb[i][k][2] * alphaB) + (Upper.rgb[i][k][2] * alphaU))
+            color = int(color)
 
             if color > 255 :
                 color = 255
@@ -71,8 +80,8 @@ def addition(Upper, Base) :
             
             resultant.rgb[i][k][2] = color
 
-
     resultant.Update_HSL()
+
     return resultant
 
     
@@ -99,11 +108,16 @@ def subtraction(Upper, Base) :
             if Base.rgb[i][k][3] > Upper.rgb[i][k][3] :
                 resultant.rgb[i][k][3] = Base.rgb[i][k][3]
 
+            alphaB = Base.rgb[i][k][3] / 255
+            alphaU = Upper.rgb[i][k][3] / 255
+            Rinverse = 255 / resultant.rgb[i][k][3]
+
             """ The RGB channels of the resultant layer is replaced with the RGB channels of Upper subtracted with RGB channels of Base """
 
             """ Assigning Red Channel """
 
-            color = (Base.rgb[i][k][0] * (Base.rgb[i][k][3] / 255)) - (Upper.rgb[i][k][0] * (Upper.rgb[i][k][3] / 255))
+            color = Rinverse * ((Upper.rgb[i][k][0] * alphaU) - (Base.rgb[i][k][0] * alphaB))
+            color = int(color)
 
             if color > 255 :
                 color = 255
@@ -114,7 +128,8 @@ def subtraction(Upper, Base) :
 
             """ Assigning Green Channel """
 
-            color = (Base.rgb[i][k][1] * (Base.rgb[i][k][3] / 255)) - (Upper.rgb[i][k][1] * (Upper.rgb[i][k][3] / 255))
+            color = Rinverse * ((Upper.rgb[i][k][1] * alphaU) - (Base.rgb[i][k][1] * alphaB))
+            color = int(color)
 
             if color > 255 :
                 color = 255
@@ -125,8 +140,9 @@ def subtraction(Upper, Base) :
 
             """ Assigning Blue Channel """
 
-            color = (Base.rgb[i][k][2] * (Base.rgb[i][k][3] / 255)) - (Upper.rgb[i][k][2] * (Upper.rgb[i][k][3] / 255))
-
+            color = Rinverse * ((Upper.rgb[i][k][2] * alphaU) - (Base.rgb[i][k][2] * alphaB))
+            color = int(color)
+            
             if color > 255 :
                 color = 255
             elif color < 0 :
@@ -134,8 +150,8 @@ def subtraction(Upper, Base) :
             
             resultant.rgb[i][k][2] = color
 
-
     resultant.Update_HSL()
+
     return resultant
 
 
