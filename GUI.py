@@ -1,17 +1,25 @@
 
+
+
 from tkinter import *
 from tkinter.filedialog import askopenfilename
 from tkinter.messagebox import showinfo
 from PIL import ImageTk, Image
 import Layer 
+import Blend_Functions as Bf
 
 
 
 
+#Functions used in GUI
 
 
-def blend() :
-    print("Still Not coded yet, Thank you, :)")
+
+def Error():
+   top = Toplevel(root)
+   top.geometry("250x50")
+   top.title("Error")
+   Label(top, text = "No Base Layer Selected!").place(x = 50, y = 15)
 
 def select_Base() :
     types = (("PNG Files", "*.png"), ("JPG Files", "*.jpg"))
@@ -26,6 +34,9 @@ def select_Base() :
     BaseImage = Layer.layer(path)
     img = (Image.open(path)).resize((170, 170))
     img = ImageTk.PhotoImage(img)
+    global Blabel
+    if Blabel != None :
+        Blabel.destroy()
     Blabel = Label(Basecanvas, image = img)
     Blabel.image = img
     Blabel.pack(anchor = 'center')
@@ -43,6 +54,9 @@ def select_Second() :
     SecondImage =  Layer.layer(path)
     img = (Image.open(path)).resize((170, 170))
     img = ImageTk.PhotoImage(img)
+    global Slabel
+    if Slabel != None :
+        Slabel.destroy()
     Slabel = Label(Secondcanvas, image = img)
     Slabel.image = img
     Slabel.pack(anchor = 'center')
@@ -61,6 +75,9 @@ def select_Upper() :
     UpperImage = Layer.layer(path)
     img = (Image.open(path)).resize((170, 170))
     img = ImageTk.PhotoImage(img)
+    global Ulabel
+    if Ulabel != None :
+        Ulabel.destroy()
     Ulabel = Label(Uppercanvas, image = img)
     Ulabel.image = img
     Ulabel.pack(anchor = 'center')
@@ -69,12 +86,94 @@ def Save_image() :
     print("Still not coded yer thank you")
 
 
+def temp() :
+    tip = Toplevel(root)
+    tip.geometry("250x100")
+    tip.title("Info")
+    info = "Second Layer\t: \nOpacity\t: {}\nlock\t: {}\nMode\t: {}"
+
+    Label(tip, text = info.format(OpacityS.get(), lockS.get(), ModeS.get())).place(x = 50, y = 15)
+
+
+def blend() :
+    if BaseImage == None :
+        Error()
+        return
+    
+    #Blending Base Layer with Second Layer
+
+    if ModeS.get() == "Normal" :
+
+        Resultant = Bf.normal(SecondImage, BaseImage)
+    
+    elif ModeS.get() == "Addition" :
+        
+        Resultant = Bf.addition(SecondImage, BaseImage)
+
+    elif ModeS.get() == "Subtraction" :
+        
+        Resultant = Bf.subtraction(SecondImage, BaseImage)
+
+    else :
+        Resultant = Bf.addition(SecondImage, BaseImage)
+
+    
+    #Blending the Resultant Layer with the Upper Layer
+
+    if ModeU.get() == "Normal" :
+
+        Resultant = Bf.normal(UpperImage, Resultant)
+
+    elif ModeU.get() == "Addition" :
+
+        Resultant = Bf.addition(UpperImage, Resultant)
+
+    elif ModeU.get() == "Subtraction" :
+
+        Resultant = Bf.subtraction(SecondImage, BaseImage)
+
+    else :
+
+        Resultant = Bf.addition(UpperImage, Resultant)
+
+
+    #Setting the Resultant image in the GUI
+
+
+    img = Resultant.image.resize((700, 700))
+    img = ImageTk.PhotoImage(img)
+    global Mlabel
+    if Mlabel != None :
+        Mlabel.destroy()
+    Mlabel = Label(Maincanvas, image = img)
+    Mlabel.image = img
+    Mlabel.place(x = 150, y = 0)
+
+BaseImage = None
+UpperImage = None
+SecondImage = None
+
+
+
+
+Slabel = None
+Blabel = None
+Ulabel = None
+Mlabel = None
+
+
+
+
+#GUI Design Codes 
+
+
+
 
 #Setting the Window  
 root = Tk()
 
 root.title("Blending Modes")
-root.geometry('1265x760')
+root.geometry('1265x765')
 
 root.configure(bg = "#1f1f1f")
 
