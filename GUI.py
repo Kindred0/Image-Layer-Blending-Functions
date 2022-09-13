@@ -1,8 +1,10 @@
 
 
 
+from asyncio import locks
+from importlib.abc import ResourceLoader
 from tkinter import *
-from tkinter.filedialog import askopenfilename
+from tkinter.filedialog import askopenfilename, asksaveasfile
 from tkinter.messagebox import showinfo
 from PIL import ImageTk, Image
 import Layer 
@@ -15,24 +17,36 @@ import Blend_Functions as Bf
 
 
 
-def Error():
-   top = Toplevel(root)
-   top.geometry("250x50")
-   top.title("Error")
-   Label(top, text = "No Base Layer Selected!").place(x = 50, y = 15)
+def Error(type = 0):
+    top = Toplevel(root)
+    top.geometry("250x50")
+    top.title("Error")
+    if type == 0 :
+        Label(top, text = "No Images Selected!").place(x = 50, y = 15)
+    
+    elif type == 1 :
+        Label(top, text = "No Image Rendered!").place(x = 50, y = 15)
 
+def Pop_ups() :
+    top = Toplevel(root)
+    top.geometry("250x50")
+    top.title("Image Saved")
+    Label(top, text = "Image Rendered and saved at ").place(x = 50, y = 15)
+
+    
 def select_Base() :
     types = (("PNG Files", "*.png"), ("JPG Files", "*.jpg"))
-    path = askopenfilename(
+    global pathB
+    pathB = askopenfilename(
         title = 'Open a file',
         initialdir = '/',
         filetypes = types)
 
-    showinfo( title = 'Selected File', message = path)
+    showinfo( title = 'Selected File', message = pathB)
 
     global BaseImage
-    BaseImage = Layer.layer(path)
-    img = (Image.open(path)).resize((170, 170))
+    BaseImage = Layer.layer(path = pathB)
+    img = (Image.open(pathB)).resize((170, 170))
     img = ImageTk.PhotoImage(img)
     global Blabel
     if Blabel != None :
@@ -43,16 +57,17 @@ def select_Base() :
 
 def select_Second() :
     types = (("PNG Files", "*.png"), ("JPG Files", "*.jpg"))
-    path = askopenfilename(
+    global pathS
+    pathS = askopenfilename(
         title = 'Open a file',
         initialdir = '/',
         filetypes = types)
 
-    showinfo( title = 'Selected File', message = path)
+    showinfo( title = 'Selected File', message = pathS)
 
     global SecondImage 
-    SecondImage =  Layer.layer(path)
-    img = (Image.open(path)).resize((170, 170))
+    SecondImage =  Layer.layer(path = pathS)
+    img = (Image.open(pathS)).resize((170, 170))
     img = ImageTk.PhotoImage(img)
     global Slabel
     if Slabel != None :
@@ -64,16 +79,17 @@ def select_Second() :
 
 def select_Upper() :
     types = (("PNG Files", "*.png"), ("JPG Files", "*.jpg"))
-    path = askopenfilename(
+    global pathU
+    pathU = askopenfilename(
         title = 'Open a file',
         initialdir = '/',
         filetypes = types)
 
-    showinfo( title = 'Selected File', message = path)
+    showinfo( title = 'Selected File', message = pathU)
 
     global UpperImage 
-    UpperImage = Layer.layer(path)
-    img = (Image.open(path)).resize((170, 170))
+    UpperImage = Layer.layer(path = pathU)
+    img = (Image.open(pathU)).resize((170, 170))
     img = ImageTk.PhotoImage(img)
     global Ulabel
     if Ulabel != None :
@@ -83,7 +99,11 @@ def select_Upper() :
     Ulabel.pack(anchor = 'center')
 
 def Save_image() :
-    print("Still not coded yer thank you")
+    if Resultant == None :
+        Error(1)
+    
+    Resultant.image.save("Rendered_Image.png")
+    
 
 
 def temp() :
@@ -96,47 +116,145 @@ def temp() :
 
 
 def blend() :
-    if BaseImage == None :
-        Error()
-        return
     
+
+    global BaseImage
+    global SecondImage
+    global UpperImage
+
+    if BaseImage == None and SecondImage == None and UpperImage == None :
+        Error(0)
+        return
+
+    global Resultant
+    Resultant = None
+    
+
+    BaseImage = Layer.layer(path = pathB)
+    SecondImage =  Layer.layer(path = pathS)
+    UpperImage = Layer.layer(path = pathU)
+
     #Blending Base Layer with Second Layer
+    BaseImage.Set_Opacity(opacity = OpacityB.get())
+    SecondImage.Set_Opacity(opacity = OpacityS.get())
+    UpperImage.Set_Opacity(opacity = OpacityU.get())
 
     if ModeS.get() == "Normal" :
 
-        Resultant = Bf.normal(SecondImage, BaseImage)
+        Resultant = Bf.normal(Upper = SecondImage, Base = BaseImage, lock = lockB.get() )
     
     elif ModeS.get() == "Addition" :
         
-        Resultant = Bf.addition(SecondImage, BaseImage)
+        Resultant = Bf.addition(Upper = SecondImage, Base = BaseImage, lock = lockB.get())
 
     elif ModeS.get() == "Subtraction" :
         
-        Resultant = Bf.subtraction(SecondImage, BaseImage)
+        Resultant = Bf.subtraction(Upper = SecondImage, Base = BaseImage, lock = lockB.get())
 
-    else :
-        Resultant = Bf.addition(SecondImage, BaseImage)
+    elif ModeS.get() == "Multiply" :
 
+        Resultant = Bf.multiply(Upper = SecondImage, Base = BaseImage, lock = lockB.get())
+
+    elif ModeS.get() == "Devide" :
+
+        Resultant = Bf.devide(Upper = SecondImage, Base = BaseImage, lock = lockB.get())
+
+    elif ModeS.get() == "Overlay" :
+
+        Resultant = Bf.overlay(Upper = SecondImage, Base = BaseImage, lock = lockB.get())
     
+    elif ModeS.get() == "Screen" :
+
+        Resultant = Bf.screen(Upper = SecondImage, Base = BaseImage, lock = lockB.get())
+
+    elif ModeS.get() == "Hues" :
+ 
+        Resultant = Bf.hue(Upper = SecondImage, Base = BaseImage, lock = lockB.get())
+
+    elif ModeS.get() == "Saturation" :
+
+        Resultant = Bf.saturation(Upper = SecondImage, Base = BaseImage, lock = lockB.get())
+
+    elif ModeS.get() == "Luminosity" :
+
+        Resultant = Bf.luminosity(Upper = SecondImage, Base = BaseImage, lock = lockB.get())
+
+    elif ModeS.get() == "Darken" :
+
+        Resultant = Bf.darken(Upper = SecondImage, Base = BaseImage, lock = lockB.get())
+
+    elif ModeS.get() == "Lighten" :
+
+        Resultant = Bf.lighten(Upper = SecondImage, Base = BaseImage, lock = lockB.get())
+
+    elif ModeS.get() == "Erase" :
+
+        Resultant = Bf.Erase(Upper = SecondImage, Base = BaseImage, lock = lockB.get())
+
+    elif ModeS.get() == "Value" :
+
+        Resultant = Bf.value(Upper = SecondImage, Base = BaseImage, lock = lockB.get())
+
     #Blending the Resultant Layer with the Upper Layer
 
     if ModeU.get() == "Normal" :
 
-        Resultant = Bf.normal(UpperImage, Resultant)
-
+        Resultant = Bf.normal(Upper = UpperImage, Base = Resultant, lock = lockS.get() )
+    
     elif ModeU.get() == "Addition" :
-
-        Resultant = Bf.addition(UpperImage, Resultant)
+        
+        Resultant = Bf.addition(Upper = UpperImage, Base = Resultant, lock = lockS.get())
 
     elif ModeU.get() == "Subtraction" :
+        
+        Resultant = Bf.subtraction(Upper = UpperImage, Base = Resultant, lock = lockS.get())
 
-        Resultant = Bf.subtraction(SecondImage, BaseImage)
+    elif ModeU.get() == "Multiply" :
 
-    else :
+        Resultant = Bf.multiply(Upper = UpperImage, Base = Resultant, lock = lockS.get())
 
-        Resultant = Bf.addition(UpperImage, Resultant)
+    elif ModeU.get() == "Devide" :
+
+        Resultant = Bf.devide(Upper = UpperImage, Base = Resultant, lock = lockS.get())
+
+    elif ModeU.get() == "Overlay" :
+
+        Resultant = Bf.overlay(Upper = UpperImage, Base = Resultant, lock = lockS.get())
+    
+    elif ModeU.get() == "Screen" :
+
+        Resultant = Bf.screen(Upper = UpperImage, Base = Resultant, lock = lockS.get())
+
+    elif ModeU.get() == "Hues" :
+
+        Resultant = Bf.hue(Upper = UpperImage, Base = Resultant, lock = lockS.get())
+
+    elif ModeU.get() == "Saturation" :
+
+        Resultant = Bf.saturation(Upper = UpperImage, Base = Resultant, lock = lockS.get())
+
+    elif ModeU.get() == "Luminosity" :
+
+        Resultant = Bf.luminosity(Upper = UpperImage, Base = Resultant, lock = lockS.get())
+
+    elif ModeU.get() == "Darken" :
+
+        Resultant = Bf.darken(Upper = UpperImage, Base = Resultant, lock = lockS.get())
+
+    elif ModeU.get() == "Lighten" :
+
+        Resultant = Bf.lighten(Upper = UpperImage, Base = Resultant, lock = lockS.get())
+
+    elif ModeU.get() == "Erase" :
+         
+         Resultant = Bf.Erase(Upper = UpperImage, Base = Resultant, lock = lockS.get())
+
+    elif ModeU.get() == "Value" :
+
+        Resultant = Bf.value(Upper = UpperImage, Base = Resultant, lock = lockS.get())
 
 
+#option = ["Normal", "Addition", "Subtraction", "Multiply", "Devide", "Overlay", "Screen", "Soft Light", "Hard Light", "Hues", "Saturation", "Luminosity", "Darken", "Lighten"]
     #Setting the Resultant image in the GUI
 
 
@@ -149,12 +267,17 @@ def blend() :
     Mlabel.image = img
     Mlabel.place(x = 150, y = 0)
 
+
+
 BaseImage = None
 UpperImage = None
 SecondImage = None
+Resultant = None
 
 
-
+pathB = None
+pathU = None
+pathS = None
 
 Slabel = None
 Blabel = None
@@ -254,7 +377,20 @@ ModeS = StringVar()
 
 #Assigning the dropboxes to frames/layers
 
-option = ["Normal", "Addition", "Subtraction", "Multiply", "Devide", "Overlay", "Screen", "Soft Light", "Hard Light", "Hues", "Saturation", "Luminosity", "Darken", "Lighten"]
+option = [  "Normal",
+            "Addition",
+            "Subtraction", 
+            "Multiply", 
+            "Devide", 
+            "Overlay", 
+            "Screen",  
+            "Hues", 
+            "Saturation", 
+            "Luminosity", 
+            "Darken", 
+            "Lighten", 
+            "Erase", 
+            "Value" ]
 ModeU.set("Normal")
 ModeS.set("Normal")
 

@@ -1,89 +1,125 @@
 
-from csv import writer
-import Color_converter as color
+import Color_converter as cc
 from PIL import Image
 import numpy
 
 
 class layer :
-    def __init__(self, row, coloumn) :
 
-        self.rgb = numpy.zeros([row, coloumn, 4])
+    def __init__(self, path = None, width = 1 , height = 1) :
 
-        self.image = Image.fromarray(self.rgb)
-
-        self.hsl = numpy.zeros([row, coloumn, 4])
-        
-        self.dimension = (row, coloumn)
-
-        self.Alpha = numpy.array([])
-
-        self.mode = "rgba" 
+        # Inititally the image will have 100% opacity
 
         self.Opacity = 100
 
-    def __init__(self, i) :
+        if path != None :
 
-        """ The Actual Image """
-        self.image = Image.open(i)
+            # The Actual Image
 
-        """ The matrix of the image in RGB """
-        self.rgb = numpy.asarray(self.image)
+            self.image = Image.open(path)
 
-        """ Change the reading mode to read and write """
-        self.rgb = self.rgb.copy()
-        self.rgb.setflags(write=1)
+            #The Matrix if the image in RGBA format
 
-        """ Dimension of the image """
-        self.dimension = self.image.size
+            self.rgb = numpy.asarray(self.image)
 
-        """ The matrix of the image in HSL """
-        self.hsl = numpy.zeros([self.dimension[0], self.dimension[1], 4])
+            # To change the reading mode from read only to read and write
 
-        """ The sparce matrix of the image of non-zero alpha's """
-        self.Alpha = numpy.array([])
+            self.rgb = self.rgb.copy()
+            self.rgb.setflags(write = 1)
 
-        """ The type of image """
-        self.mode = self.image.mode
+            # Dimesion of the image
 
-        """ Setting the opacity of the image to a full 100% , Opacity represents the transparency of the layer """
-        self.Opacity = 100
+            self.dimension = self.image.size
+            self.dimension = (self.dimension[1], self.dimension[0])
 
-        """ Obtaining the HSL matrix from the RGB matrix """
+            # The Matrix of the image in HSL format, Currently Unassigned to save space
+
+            self.hsl = numpy.array([])
+
+            # The Matrix containing the alpha values according to the opacity of the image.
+
+            self.Alpha = numpy.zeros([self.dimension[0], self.dimension[1]])
+
+            # The reading mode of the image
+
+            self.mode = self.image.mode
+
+            self.sparce = []
+
+            # Constructing the Alpha matrices
+
+            for i in range(0, self.dimension[0]) :
+                for k in range(0, self.dimension[1]) :
+                    self.Alpha[i][k] = self.rgb[i][k][3]
+
+                    if self.rgb[i][k][3] != 0 :
+                        self.sparce.append((i, k))
+
+
+        else :
+
+            self.rgb = numpy.zeros([width, height, 4])
+
+            self.image = None
+
+            self.dimension = (width, height)
+
+            self.Alpha = numpy.zeros([width, height])
+
+            self.mode = "rgba" 
+
+    # To set the opacity of the image and also change the alpha values of the Alpha Matrix accordingly
+
+    def Set_Opacity(self, opacity) :
+        self.Opacity = opacity
+
+        if self.Opacity > 100 :
+             self.Opacity = 100
+        elif self.Opacity < 0 :
+            self.Opacity = 0
+
         for i in range(0, self.dimension[0]) :
             for k in range(0, self.dimension[1]) :
-                self.hsl[i][k] = color.RGBtoHSL(self.rgb[i][k])
+                self.Alpha[i][k] = self.rgb[i][k][3] * (self.Opacity / 100)
+                self.Alpha[i][k] = int(self.Alpha[i][k])
 
 
 
-    """ To update the image in case the RGB matrix is modified """
+    # To construct the RGBA Matrix in case the 
+
     def Update_image(self) :
         self.image = Image.fromarray(self.rgb)
 
 
-    """ To update the RGB matrix in case the HSL matrix is modified """
-    def Update_RGB(self) :
+    def Construct_HSL(self) :
+        self.hsl = []
+        self.hsl = numpy.zeros([self.dimension[1], self.dimension[0]])
         for i in range(0, self.dimension[0]) :
             for k in range(0, self.dimension[1]) :
-                self.rgb[i][k] = color.HSLtoRGB(self.hsl[i][k])
-        self.Update_image()
+                self.hsl[i][k] = cc.RGBtoHSL(self.rgb[i][k])
 
 
-    """ To Update the hsl matrix in case the RGB matrix is modified """
-    def Update_HSL(self) :
+
+    # To Construct the Sparce Matrix 
+
+    def Construct_sparce(self) :
+        self.sparce = []
         for i in range(0, self.dimension[0]) :
             for k in range(0, self.dimension[1]) :
-                self.hsl[i][k] = color.RGBtoHSL(self.rgb[i][k])
-        self.Update_image()
+                if self.Alpha[i][k] != 0 :
+                    self.sparce.append((i , k))
 
 
-    def __del__(self) :
-        self.image.close()
 
+
+
+    # Display Image
 
     def display(self) :
         self.image.show()
 
+
+    # Display RGB Matrix 
 
     def show_rgb(self) :
         for i in self.rgb :
@@ -92,7 +128,10 @@ class layer :
                 print(k, end= " ")
 
 
+    #Display HSL Matrix 
+
     def show_hsl(self) :
+        self.Construct_HSL()
         for i in self.hsl :
             print("\n\nrow\n")
             for k in i :
