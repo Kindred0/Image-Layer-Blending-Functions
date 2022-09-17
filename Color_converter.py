@@ -1,12 +1,15 @@
 
 import Utilities as util
-
+import numpy as np
 
 def RGBtoHSV(rgb) :
     red = rgb[0]/255
     green = rgb[1]/255
     blue = rgb[2]/255
-    alpha = rgb[3]
+    if rgb.size == 4 :
+        alpha = rgb[3]
+
+    
 
     cmax = util.Max(red, util.Max(blue, green))
     cmin = util.Min(red, util.Min(blue, green))
@@ -34,15 +37,18 @@ def RGBtoHSV(rgb) :
         saturation = 0
     else : 
         saturation = delta / cmax
-
-    color = [hue , saturation, value, alpha]
+    if rgb.size == 4 :
+        color = np.array([hue, saturation, value, alpha])
+    else :
+        color = np.array([hue, saturation, value])
     return color
 
 def HSVtoRGB(hsv) :
     hue = hsv[0]
     saturation = hsv[1]
     value = hsv[2]
-    alpha = hsv[3]
+    if hsv.size == 4 :
+        alpha = hsv[3]
 
     """Chroma , X, m calculation"""
 
@@ -83,17 +89,20 @@ def HSVtoRGB(hsv) :
     red = int(red)
     green = int(green)
     blue = int(blue)
-
-    color = [red, green, blue, alpha]
+    if hsv.size == 4 :
+        color = np.array([red, green, blue, alpha])
+    else :
+        color = np.array([red, green, blue])
 
     return color
 
 
 def RGBtoHSL(rgb) :
-    red = rgb[0]/255
-    green = rgb[1]/255
-    blue = rgb[2]/255
-    alpha = rgb[3]
+    red = rgb[0] / 255
+    green = rgb[1] / 255
+    blue = rgb[2] / 255
+    if rgb.size == 4 :
+        alpha = rgb[3]
 
     cmax = util.Max(red, util.Max(blue, green))
     cmin = util.Min(red, util.Min(blue, green))
@@ -126,14 +135,18 @@ def RGBtoHSL(rgb) :
     elif cmax == blue :
         hue = 60 * (((red - green) / delta) + 4)
 
-    color = [hue , saturation, luminosity, alpha]
+    if rgb.size == 4 :
+        color = np.array([hue , saturation, luminosity, alpha])
+    else :
+        color = np.array([hue, saturation, luminosity])
     return color
 
 def HSLtoRGB(hsl) :
     hue = hsl[0]
     saturation = hsl[1]
     luminosity = hsl[2]
-    alpha = hsl[3]
+    if hsl.size == 4 :
+        alpha = hsl[3]
 
     """Chroma , X, m calculation"""
 
@@ -178,6 +191,9 @@ def HSLtoRGB(hsl) :
     green = int(green)
     blue = int(blue)
 
-    color = [red, green, blue, alpha]
+    if hsl.size == 4 :
+        color = np.array([red, green, blue, alpha])
+    else :
+        color = np.array([red, green, blue])
 
     return color

@@ -50,10 +50,17 @@ class layer :
 
             for i in range(0, self.dimension[0]) :
                 for k in range(0, self.dimension[1]) :
-                    self.Alpha[i][k] = self.rgb[i][k][3]
+                    if self.mode == 'RGBA' :
+                        self.Alpha[i][k] = self.rgb[i][k][3]
 
-                    if self.rgb[i][k][3] != 0 :
-                        self.sparce.append((i, k))
+                        if self.rgb[i][k][3] != 0 :
+                            self.sparce.append((i, k))
+                        
+
+                    elif self.mode == 'RGB' or self.mode == 'L' :
+
+                        self.Alpha[i][k] = 255
+
 
 
         else :
@@ -66,7 +73,7 @@ class layer :
 
             self.Alpha = numpy.zeros([width, height])
 
-            self.mode = "rgba" 
+            self.mode = "RGBA"  
 
     # To set the opacity of the image and also change the alpha values of the Alpha Matrix accordingly
 
@@ -78,11 +85,17 @@ class layer :
         elif self.Opacity < 0 :
             self.Opacity = 0
 
+
+        
         for i in range(0, self.dimension[0]) :
             for k in range(0, self.dimension[1]) :
-                self.Alpha[i][k] = self.rgb[i][k][3] * (self.Opacity / 100)
-                self.Alpha[i][k] = int(self.Alpha[i][k])
+                if self.mode == 'RGBA' :
+                    self.Alpha[i][k] = self.rgb[i][k][3] * (self.Opacity / 100)
+                    self.Alpha[i][k] = int(self.Alpha[i][k])
 
+                elif self.mode == 'RGB' or 'L' :
+                    self.Alpha[i][k] = 255 * (self.Opacity / 100)
+                    self.Alpha[i][k] = int(self.Alpha[i][k])
 
 
     # To construct the RGBA Matrix in case the 
@@ -93,10 +106,13 @@ class layer :
 
     def Construct_HSL(self) :
         self.hsl = []
-        self.hsl = numpy.zeros([self.dimension[1], self.dimension[0]])
+        temp = []
         for i in range(0, self.dimension[0]) :
             for k in range(0, self.dimension[1]) :
-                self.hsl[i][k] = cc.RGBtoHSL(self.rgb[i][k])
+                temp.append(cc.RGBtoHSL(self.rgb[i][k]))
+            self.hsl.append(temp)
+            temp = []
+        self.hsl = numpy.ndarray(self.hsl)
 
 
 

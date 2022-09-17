@@ -2,6 +2,7 @@
 import Color_converter as cc
 import Layer
 import Utilities as util
+import numpy as np
 
 """ All Binary Blending Functions takes two layers , Base layer and Upper layer, the Base layer always 
     underneath the Upper layer. The resultant layer takes the dimension of the Base layer """
@@ -68,7 +69,7 @@ def addition(Upper, Base, lock) :
 
     #Checks if the Base layer is alpha locked 
     
-    if lock == 0 :
+    if lock == 0 or Base.mode == 'RGB' :
         
 
         #The actual addition blending Function
@@ -77,27 +78,30 @@ def addition(Upper, Base, lock) :
             for k in range(0, height) :
 
                 #Resultant layer takes the largest alpha channel of the two layers
-
                 if Base.Alpha[i][k] < Upper.Alpha[i][k] :
 
                     #If yes, the alpha value is replaced by the greater alpha value
-
-                    resultant.rgb[i][k][3] = Upper.Alpha[i][k]
+                    if Base.mode == 'RGBA' :
+                        resultant.rgb[i][k][3] = Upper.Alpha[i][k]
                     resultant.Alpha[i][k] = Upper.Alpha[i][k]
 
                 else :
-
-                    resultant.rgb[i][k][3] = Base.Alpha[i][k]
+                    
+                    if Base.mode == 'RGBA' :
+                        resultant.rgb[i][k][3] = Base.Alpha[i][k]
                     resultant.Alpha[i][k] = Base.Alpha[i][k]
                     
 
 
                 alphaB = Base.Alpha[i][k] / 255
                 alphaU = Upper.Alpha[i][k] / 255
-                if resultant.rgb[i][k][3] == 0:
-                    Rinverse = 0
+                if Base.mode == 'RGBA' :
+                    if resultant.rgb[i][k][3] == 0:
+                        Rinverse = 0
+                    else :
+                        Rinverse = 255 / resultant.rgb[i][k][3]
                 else :
-                    Rinverse = 255 / resultant.rgb[i][k][3]
+                    Rinverse = 1
 
                 #The RGB channels of the resultant layer is replaced with the sum of the RGB channels of the two layers
 
@@ -125,7 +129,7 @@ def addition(Upper, Base, lock) :
 
 
     # If the alpha lock is true
-    elif lock == 1 :
+    elif lock == 1 and Base.mode == 'RGBA':
         
         for i in Base.sparce :
 
@@ -224,7 +228,7 @@ def subtraction(Upper, Base, lock = 0) :
 
     #Checks if the Base layer is alpha locked 
     
-    if lock == 0 :
+    if lock == 0 or Base.mode == 'RGB' :
         
 
         #The actual addition blending Function
@@ -236,24 +240,27 @@ def subtraction(Upper, Base, lock = 0) :
 
                 if Base.Alpha[i][k] < Upper.Alpha[i][k] :
 
-                    #If yes, the alpha value is replaced by the greater alpha value
-
-                    resultant.rgb[i][k][3] = Upper.Alpha[i][k]
+                    if Base.mode == 'RGBA' :
+                        resultant.rgb[i][k][3] = Upper.Alpha[i][k]
                     resultant.Alpha[i][k] = Upper.Alpha[i][k]
 
                 else :
-
-                    resultant.rgb[i][k][3] = Base.Alpha[i][k]
+                    
+                    if Base.mode == 'RGBA' :
+                        resultant.rgb[i][k][3] = Base.Alpha[i][k]
                     resultant.Alpha[i][k] = Base.Alpha[i][k]
                     
 
 
                 alphaB = Base.Alpha[i][k] / 255
                 alphaU = Upper.Alpha[i][k] / 255
-                if resultant.rgb[i][k][3] == 0:
-                    Rinverse = 0
+                if Base.mode == 'RGBA' :
+                    if resultant.rgb[i][k][3] == 0:
+                        Rinverse = 0
+                    else :
+                        Rinverse = 255 / resultant.rgb[i][k][3]
                 else :
-                    Rinverse = 255 / resultant.rgb[i][k][3]
+                    Rinverse = 1
 
                 #The RGB channels of the resultant layer is replaced with the sum of the RGB channels of the two layers
 
@@ -281,7 +288,7 @@ def subtraction(Upper, Base, lock = 0) :
 
 
     # If the alpha lock is true
-    elif lock == 1 :
+    elif lock == 1 and Base.mode == 'RGBA':
         
         for i in Base.sparce :
 
@@ -380,27 +387,32 @@ def normal(Upper, Base, lock = 0) :
     resultant = Base
 
     #The Normal blending Function
-    if lock == 0 :
+    if lock == 0 or Base.mode == 'RGB' :
 
         for i in range(0, length) :
             for k in range(0, height) :
 
                 if Base.Alpha[i][k] < Upper.Alpha[i][k] :
 
-                    resultant.rgb[i][k][3] = Upper.Alpha[i][k]
+                    if Base.mode == 'RGBA' :
+                        resultant.rgb[i][k][3] = Upper.Alpha[i][k]
                     resultant.Alpha[i][k] = Upper.Alpha[i][k]
 
                 else :
-
-                    resultant.rgb[i][k][3] = Base.Alpha[i][k]
+                    
+                    if Base.mode == 'RGBA' :
+                        resultant.rgb[i][k][3] = Base.Alpha[i][k]
                     resultant.Alpha[i][k] = Base.Alpha[i][k]
 
                 alphaB = Base.Alpha[i][k] / 255
                 alphaU = Upper.Alpha[i][k] / 255
-                if resultant.rgb[i][k][3] == 0:
-                    Rinverse = 0
+                if Base.mode == 'RGBA' :
+                    if resultant.rgb[i][k][3] == 0:
+                        Rinverse = 0
+                    else :
+                        Rinverse = 255 / resultant.rgb[i][k][3]
                 else :
-                    Rinverse = 255 / resultant.rgb[i][k][3]
+                    Rinverse = 1
 
                 for m in range (0, 3) :
 
@@ -424,7 +436,7 @@ def normal(Upper, Base, lock = 0) :
 
 
 
-    elif lock == 1 :
+    elif lock == 1 and Base.mode == 'RGBA':
         
         for i in Base.sparce :
 
@@ -522,34 +534,41 @@ def multiply(Upper, Base, lock = 0) :
 
     resultant = Base
 
-    if lock == 0 :
+    if lock == 0 or Base.mode == 'RGB' :
 
         for i in range(0, length) :
             for k in range(0, height) :
 
                 if Base.Alpha[i][k] < Upper.Alpha[i][k] :
 
-                    resultant.rgb[i][k][3] = Upper.Alpha[i][k]
+                    if Base.mode == 'RGBA' :
+                        resultant.rgb[i][k][3] = Upper.Alpha[i][k]
                     resultant.Alpha[i][k] = Upper.Alpha[i][k]
 
                 else :
-
-                    resultant.rgb[i][k][3] = Base.Alpha[i][k]
+                    
+                    if Base.mode == 'RGBA' :
+                        resultant.rgb[i][k][3] = Base.Alpha[i][k]
                     resultant.Alpha[i][k] = Base.Alpha[i][k]
 
                 alphaB = Base.Alpha[i][k] / 255
                 alphaU = Upper.Alpha[i][k] / 255
-                if resultant.rgb[i][k][3] == 0:
-                    Rinverse = 0
+                if Base.mode == 'RGBA' :
+                    if resultant.rgb[i][k][3] == 0:
+                        Rinverse = 0
+                    else :
+                        Rinverse = 255 / resultant.rgb[i][k][3]
                 else :
-                    Rinverse = 255 / resultant.rgb[i][k][3]
+                    Rinverse = 1
 
                 hsvB = cc.RGBtoHSL(Base.rgb[i][k])
                 hsvU = cc.RGBtoHSL(Upper.rgb[i][k])
                 hsvB[1] = hsvB[1] * alphaB
                 hsvU[1] = hsvU[1] * alphaU
                 
-                colorR = hsvU
+                colorR = hsvB
+                colorR[0] = hsvU[0]
+                colorR[1] = hsvU[1]
                 colorR[2] = hsvU[2] * hsvB[2]
 
                 if colorR[2] > 100 :
@@ -558,12 +577,13 @@ def multiply(Upper, Base, lock = 0) :
                     colorR[2] = 0
 
                 colorR = cc.HSLtoRGB(colorR)
-                colorR[3] = resultant.rgb[i][k][3]
+                if Base.mode == 'RGBA' :
+                    colorR[3] = resultant.rgb[i][k][3]
 
                 resultant.rgb[i][k] = colorR
 
 
-    elif lock == 1 :
+    elif lock == 1 and Base.mode == 'RGBA':
 
         for v in Base.sparce :
 
@@ -675,27 +695,32 @@ def devide(Upper, Base, lock = 1) :
 
     resultant = Base
 
-    if lock == 0 :
+    if lock == 0 or Base.mode == 'RGB' :
 
         for i in range(0, length) :
             for k in range(0, height) :
 
                 if Base.Alpha[i][k] < Upper.Alpha[i][k] :
 
-                    resultant.rgb[i][k][3] = Upper.Alpha[i][k]
+                    if Base.mode == 'RGBA' :
+                        resultant.rgb[i][k][3] = Upper.Alpha[i][k]
                     resultant.Alpha[i][k] = Upper.Alpha[i][k]
 
                 else :
-
-                    resultant.rgb[i][k][3] = Base.Alpha[i][k]
+                    
+                    if Base.mode == 'RGBA' :
+                        resultant.rgb[i][k][3] = Base.Alpha[i][k]
                     resultant.Alpha[i][k] = Base.Alpha[i][k]
 
                 alphaB = Base.Alpha[i][k] / 255
                 alphaU = Upper.Alpha[i][k] / 255
-                if resultant.rgb[i][k][3] == 0:
-                    Rinverse = 0
+                if Base.mode == 'RGBA' :
+                    if resultant.rgb[i][k][3] == 0:
+                        Rinverse = 0
+                    else :
+                        Rinverse = 255 / resultant.rgb[i][k][3]
                 else :
-                    Rinverse = 255 / resultant.rgb[i][k][3]
+                    Rinverse = 1
 
                 hsvB = cc.RGBtoHSL(Base.rgb[i][k])
                 hsvU = cc.RGBtoHSL(Upper.rgb[i][k])
@@ -704,7 +729,9 @@ def devide(Upper, Base, lock = 1) :
 
                 hsvU[0] = (hsvU[0] + 180 ) % 360
                 
-                colorR = hsvU
+                colorR = hsvB
+                colorR[0] = hsvU[0]
+                colorR[1] = hsvU[1]
                 colorR[2] = hsvU[2] * hsvB[2]
 
                 if colorR[2] > 100 :
@@ -713,12 +740,13 @@ def devide(Upper, Base, lock = 1) :
                     colorR[2] = 0
 
                 colorR = cc.HSLtoRGB(colorR)
-                colorR[3] = resultant.rgb[i][k][3]
+                if Base.mode == 'RGBA' :
+                    colorR[3] = resultant.rgb[i][k][3]
 
                 resultant.rgb[i][k] = colorR
 
 
-    elif lock == 1 :
+    elif lock == 1 and Base.mode == 'RGBA':
 
         for v in Base.sparce :
 
@@ -827,27 +855,32 @@ def darken(Upper, Base, lock = 0) :
     resultant = Base
 
 
-    if lock == 0 :
+    if lock == 0 or Base.mode == 'RGB' :
 
         for i in range(0, length) :
             for k in range(0, height) :
 
                 if Base.Alpha[i][k] < Upper.Alpha[i][k] :
 
-                    resultant.rgb[i][k][3] = Upper.Alpha[i][k]
+                    if Base.mode == 'RGBA' :
+                        resultant.rgb[i][k][3] = Upper.Alpha[i][k]
                     resultant.Alpha[i][k] = Upper.Alpha[i][k]
 
                 else :
-
-                    resultant.rgb[i][k][3] = Base.Alpha[i][k]
+                    
+                    if Base.mode == 'RGBA' :
+                        resultant.rgb[i][k][3] = Base.Alpha[i][k]
                     resultant.Alpha[i][k] = Base.Alpha[i][k]
 
                 alphaB = Base.Alpha[i][k] / 255
                 alphaU = Upper.Alpha[i][k] / 255
-                if resultant.rgb[i][k][3] == 0:
-                    Rinverse = 0
+                if Base.mode == 'RGBA' :
+                    if resultant.rgb[i][k][3] == 0:
+                        Rinverse = 0
+                    else :
+                        Rinverse = 255 / resultant.rgb[i][k][3]
                 else :
-                    Rinverse = 255 / resultant.rgb[i][k][3]
+                    Rinverse = 1
 
                 for m in range (0, 3) :
 
@@ -860,7 +893,7 @@ def darken(Upper, Base, lock = 0) :
 
 
 
-    elif lock == 1 :
+    elif lock == 1 and Base.mode == 'RGBA':
         
         for v in Base.sparce :
 
@@ -960,28 +993,33 @@ def lighten(Upper, Base, lock) :
     resultant = Base
 
 
-    if lock == 0 :
+    if lock == 0 or Base.mode == 'RGB' :
 
         for i in range(0, length) :
             for k in range(0, height) :
 
                 if Base.Alpha[i][k] < Upper.Alpha[i][k] :
 
-                    resultant.rgb[i][k][3] = Upper.Alpha[i][k]
+                    if Base.mode == 'RGBA' :
+                        resultant.rgb[i][k][3] = Upper.Alpha[i][k]
                     resultant.Alpha[i][k] = Upper.Alpha[i][k]
 
                 else :
-
-                    resultant.rgb[i][k][3] = Base.Alpha[i][k]
+                    
+                    if Base.mode == 'RGBA' :
+                        resultant.rgb[i][k][3] = Base.Alpha[i][k]
                     resultant.Alpha[i][k] = Base.Alpha[i][k]
 
                 alphaB = Base.Alpha[i][k] / 255
                 alphaU = Upper.Alpha[i][k] / 255
-                if resultant.rgb[i][k][3] == 0:
-                    Rinverse = 0
+                if Base.mode == 'RGBA' :
+                    if resultant.rgb[i][k][3] == 0:
+                        Rinverse = 0
+                    else :
+                        Rinverse = 255 / resultant.rgb[i][k][3]
                 else :
-                    Rinverse = 255 / resultant.rgb[i][k][3]
-
+                    Rinverse = 1
+                    
                 for m in range (0, 3) :
 
                     colorB = Base.rgb[i][k][m] * alphaB
@@ -993,7 +1031,7 @@ def lighten(Upper, Base, lock) :
 
 
 
-    elif lock == 1 :
+    elif lock == 1 and Base.mode == 'RGBA':
         
         for v in Base.sparce :
 
@@ -1093,7 +1131,7 @@ def Erase(Upper, Base, lock = 0) :
     resultant = Base
 
 
-    if lock == 0 :
+    if lock == 0 or Base.mode == 'RGB' :
 
         for i in range(0, length) :
             for k in range(0, height) :
@@ -1105,18 +1143,24 @@ def Erase(Upper, Base, lock = 0) :
                 alphaR = alphaB - alphaU
                 if alphaR < 0 :
                     alphaR = 0
-
-                resultant.rgb[i][k][3] = alphaR
+                if Base.mode == 'RGBA' :
+                    resultant.rgb[i][k][3] = alphaR
                 resultant.Alpha[i][k] = alphaR
 
-                if resultant.rgb[i][k][3] == 0:
-                    resultant.rgb[i][k][0] = 0
-                    resultant.rgb[i][k][1] = 0
-                    resultant.rgb[i][k][2] = 0
+                if Base.mode == 'RGBA' :
+                    if resultant.rgb[i][k][3] == 0 :
+                        resultant.rgb[i][k][0] = 0
+                        resultant.rgb[i][k][1] = 0
+                        resultant.rgb[i][k][2] = 0
+                else :
+                    if resultant.Alpha[i][k] == 0 :
+                        resultant.rgb[i][k][0] = 0
+                        resultant.rgb[i][k][1] = 0
+                        resultant.rgb[i][k][2] = 0
 
 
 
-    elif lock == 1 :
+    elif lock == 1 and Base.mode == 'RGBA':
         
         for v in Base.sparce :
 
@@ -1203,41 +1247,50 @@ def hue(Upper, Base, lock = 0) :
     resultant = Base
 
 
-    if lock == 0 :
+    if lock == 0 or Base.mode == 'RGB' :
 
         for i in range(0, length) :
             for k in range(0, height) :
 
                 if Base.Alpha[i][k] < Upper.Alpha[i][k] :
 
-                    resultant.rgb[i][k][3] = Upper.Alpha[i][k]
+                    if Base.mode == 'RGBA' :
+                        resultant.rgb[i][k][3] = Upper.Alpha[i][k]
                     resultant.Alpha[i][k] = Upper.Alpha[i][k]
 
                 else :
-
-                    resultant.rgb[i][k][3] = Base.Alpha[i][k]
+                    
+                    if Base.mode == 'RGBA' :
+                        resultant.rgb[i][k][3] = Base.Alpha[i][k]
                     resultant.Alpha[i][k] = Base.Alpha[i][k]
 
                 alphaB = Base.Alpha[i][k] / 255
-                if resultant.rgb[i][k][3] == 0:
-                    Rinverse = 0
+                if Base.mode == 'RGBA' :
+                    if resultant.rgb[i][k][3] == 0:
+                        Rinverse = 0
+                    else :
+                        Rinverse = 255 / resultant.rgb[i][k][3]
                 else :
-                    Rinverse = 255 / resultant.rgb[i][k][3]
+                    Rinverse = 1
 
                 hslB = cc.RGBtoHSL(Base.rgb[i][k])
                 hslU = cc.RGBtoHSL(Upper.rgb[i][k])
 
-                colorR = [0, 0, 0, 0]
+                if Base.mode == 'RGBA' :
+                    colorR = [0, 0, 0, 0]
+                    colorR[3] = resultant.rgb[i][k][3]
+                elif Base.mode == 'RGB' :
+                    colorR = [0, 0, 0]
                 colorR[0] = hslU[0]
                 colorR[1] = hslB[1] * alphaB
                 colorR[2] = hslB[2]
-                colorR[3] = resultant.rgb[i][k][3]
+                colorR = np.array(colorR)
                 colorR = cc.HSLtoRGB(colorR)
 
                 resultant.rgb[i][k] = colorR
 
 
-    elif lock == 1 :
+    elif lock == 1 and Base.mode == 'RGBA':
         
         for v in Base.sparce :
 
@@ -1267,6 +1320,7 @@ def hue(Upper, Base, lock = 0) :
             colorR[1] = hslB[1] * alphaB
             colorR[2] = hslB[2]
             colorR[3] = resultant.rgb[i][k][3]
+            colorR = np.array(colorR)
             colorR = cc.HSLtoRGB(colorR)
 
             resultant.rgb[i][k] = colorR
@@ -1327,35 +1381,44 @@ def saturation(Upper, Base, lock = 0) :
     resultant = Base
 
 
-    if lock == 0 :
+    if lock == 0 or Base.mode == 'RGB' :
 
         for i in range(0, length) :
             for k in range(0, height) :
 
                 if Base.Alpha[i][k] < Upper.Alpha[i][k] :
 
-                    resultant.rgb[i][k][3] = Upper.Alpha[i][k]
+                    if Base.mode == 'RGBA' :
+                        resultant.rgb[i][k][3] = Upper.Alpha[i][k]
                     resultant.Alpha[i][k] = Upper.Alpha[i][k]
 
                 else :
-
-                    resultant.rgb[i][k][3] = Base.Alpha[i][k]
+                    
+                    if Base.mode == 'RGBA' :
+                        resultant.rgb[i][k][3] = Base.Alpha[i][k]
                     resultant.Alpha[i][k] = Base.Alpha[i][k]
 
                 alphaU = Upper.Alpha[i][k] / 255
-                if resultant.rgb[i][k][3] == 0:
-                    Rinverse = 0
+                if Base.mode == 'RGBA' :
+                    if resultant.rgb[i][k][3] == 0:
+                        Rinverse = 0
+                    else :
+                        Rinverse = 255 / resultant.rgb[i][k][3]
                 else :
-                    Rinverse = 255 / resultant.rgb[i][k][3]
+                    Rinverse = 1
 
                 hslB = cc.RGBtoHSL(Base.rgb[i][k])
                 hslU = cc.RGBtoHSL(Upper.rgb[i][k])
 
-                colorR = [0, 0, 0, 0]
+                if Base.mode == 'RGBA' :
+                    colorR = [0, 0, 0, 0]
+                    colorR[3] = resultant.rgb[i][k][3]
+                elif Base.mode == 'RGB' :
+                    colorR = [0, 0, 0]
                 colorR[0] = hslB[0]
                 colorR[1] = hslU[1] * alphaU
                 colorR[2] = hslB[2]
-                colorR[3] = resultant.rgb[i][k][3]
+                colorR = np.array(colorR)
                 colorR = cc.HSLtoRGB(colorR)
 
                 resultant.rgb[i][k][0] = colorR[0] * Rinverse
@@ -1363,7 +1426,7 @@ def saturation(Upper, Base, lock = 0) :
                 resultant.rgb[i][k][2] = colorR[2] * Rinverse
 
 
-    elif lock == 1 :
+    elif lock == 1 and Base.mode == 'RGBA':
         
         for v in Base.sparce :
 
@@ -1391,6 +1454,7 @@ def saturation(Upper, Base, lock = 0) :
             colorR[1] = hslU[1] * alphaU
             colorR[2] = hslB[2]
             colorR[3] = resultant.rgb[i][k][3]
+            colorR = np.array(colorR)
             colorR = cc.HSLtoRGB(colorR)
             
             resultant.rgb[i][k][0] = colorR[0] * Rinverse
@@ -1455,35 +1519,44 @@ def luminosity(Upper, Base, lock = 0) :
     resultant = Base
 
 
-    if lock == 0 :
+    if lock == 0 or Base.mode == 'RGB' :
 
         for i in range(0, length) :
             for k in range(0, height) :
 
                 if Base.Alpha[i][k] < Upper.Alpha[i][k] :
 
-                    resultant.rgb[i][k][3] = Upper.Alpha[i][k]
+                    if Base.mode == 'RGBA' :
+                        resultant.rgb[i][k][3] = Upper.Alpha[i][k]
                     resultant.Alpha[i][k] = Upper.Alpha[i][k]
 
                 else :
-
-                    resultant.rgb[i][k][3] = Base.Alpha[i][k]
+                    
+                    if Base.mode == 'RGBA' :
+                        resultant.rgb[i][k][3] = Base.Alpha[i][k]
                     resultant.Alpha[i][k] = Base.Alpha[i][k]
 
                 alphaB = Base.Alpha[i][k] / 255
-                if resultant.rgb[i][k][3] == 0:
-                    Rinverse = 0
+                if Base.mode == 'RGBA' :
+                    if resultant.rgb[i][k][3] == 0:
+                        Rinverse = 0
+                    else :
+                        Rinverse = 255 / resultant.rgb[i][k][3]
                 else :
-                    Rinverse = 255 / resultant.rgb[i][k][3]
+                    Rinverse = 1
 
                 hslB = cc.RGBtoHSL(Base.rgb[i][k])
                 hslU = cc.RGBtoHSL(Upper.rgb[i][k])
 
-                colorR = [0, 0, 0, 0]
+                if Base.mode == 'RGBA' :
+                    colorR = [0, 0, 0, 0]
+                    colorR[3] = resultant.rgb[i][k][3]
+                elif Base.mode == 'RGB' :
+                    colorR = [0, 0, 0]
                 colorR[0] = hslB[0]
                 colorR[1] = hslB[1] * alphaB
                 colorR[2] = hslU[2]
-                colorR[3] = resultant.rgb[i][k][3]
+                colorR = np.array(colorR)
                 colorR = cc.HSLtoRGB(colorR)
 
                 resultant.rgb[i][k][0] = colorR[0] * Rinverse
@@ -1491,7 +1564,7 @@ def luminosity(Upper, Base, lock = 0) :
                 resultant.rgb[i][k][2] = colorR[2] * Rinverse
 
 
-    elif lock == 1 :
+    elif lock == 1 and Base.mode == 'RGBA':
         
         for v in Base.sparce :
 
@@ -1519,6 +1592,7 @@ def luminosity(Upper, Base, lock = 0) :
             colorR[1] = hslB[1] * alphaB
             colorR[2] = hslU[2]
             colorR[3] = resultant.rgb[i][k][3]
+            colorR = np.array(colorR)
             colorR = cc.HSLtoRGB(colorR)
             
             resultant.rgb[i][k][0] = colorR[0] * Rinverse
@@ -1573,35 +1647,44 @@ def value(Upper, Base, lock = 0) :
     resultant = Base
 
 
-    if lock == 0 :
+    if lock == 0 or Base.mode == 'RGB' :
 
         for i in range(0, length) :
             for k in range(0, height) :
 
                 if Base.Alpha[i][k] < Upper.Alpha[i][k] :
 
-                    resultant.rgb[i][k][3] = Upper.Alpha[i][k]
+                    if Base.mode == 'RGBA' :
+                        resultant.rgb[i][k][3] = Upper.Alpha[i][k]
                     resultant.Alpha[i][k] = Upper.Alpha[i][k]
 
                 else :
-
-                    resultant.rgb[i][k][3] = Base.Alpha[i][k]
+                    
+                    if Base.mode == 'RGBA' :
+                        resultant.rgb[i][k][3] = Base.Alpha[i][k]
                     resultant.Alpha[i][k] = Base.Alpha[i][k]
 
                 alphaB = Base.Alpha[i][k] / 255
-                if resultant.rgb[i][k][3] == 0:
-                    Rinverse = 0
+                if Base.mode == 'RGBA' :
+                    if resultant.rgb[i][k][3] == 0:
+                        Rinverse = 0
+                    else :
+                        Rinverse = 255 / resultant.rgb[i][k][3]
                 else :
-                    Rinverse = 255 / resultant.rgb[i][k][3]
+                    Rinverse = 1
 
                 hslB = cc.RGBtoHSV(Base.rgb[i][k])
                 hslU = cc.RGBtoHSV(Upper.rgb[i][k])
 
-                colorR = [0, 0, 0, 0]
+                if Base.mode == 'RGBA' :
+                    colorR = [0, 0, 0, 0]
+                    colorR[3] = resultant.rgb[i][k][3]
+                elif Base.mode == 'RGB' :
+                    colorR = [0, 0, 0]
                 colorR[0] = hslB[0]
                 colorR[1] = hslB[1] * alphaB
                 colorR[2] = hslU[2]
-                colorR[3] = resultant.rgb[i][k][3]
+                colorR = np.array(colorR)
                 colorR = cc.HSVtoRGB(colorR)
 
                 resultant.rgb[i][k][0] = colorR[0] * Rinverse
@@ -1609,7 +1692,7 @@ def value(Upper, Base, lock = 0) :
                 resultant.rgb[i][k][2] = colorR[2] * Rinverse
 
 
-    elif lock == 1 :
+    elif lock == 1 and Base.mode == 'RGBA':
         
         for v in Base.sparce :
 
@@ -1637,6 +1720,7 @@ def value(Upper, Base, lock = 0) :
             colorR[1] = hslB[1] * alphaB
             colorR[2] = hslU[2]
             colorR[3] = resultant.rgb[i][k][3]
+            colorR = np.array(colorR)
             colorR = cc.HSVtoRGB(colorR)
             
             resultant.rgb[i][k][0] = colorR[0] * Rinverse
@@ -1689,44 +1773,51 @@ def overlay(Upper, Base, lock = 0) :
 
     resultant = Base
 
-    if lock == 0 :
+    if lock == 0 or Base.mode == 'RGB' :
 
         for i in range(0, length) :
             for k in range(0, height) :
 
                 if Base.Alpha[i][k] < Upper.Alpha[i][k] :
 
-                    resultant.rgb[i][k][3] = Upper.Alpha[i][k]
+                    if Base.mode == 'RGBA' :
+                        resultant.rgb[i][k][3] = Upper.Alpha[i][k]
                     resultant.Alpha[i][k] = Upper.Alpha[i][k]
 
                 else :
-
-                    resultant.rgb[i][k][3] = Base.Alpha[i][k]
+                    
+                    if Base.mode == 'RGBA' :
+                        resultant.rgb[i][k][3] = Base.Alpha[i][k]
                     resultant.Alpha[i][k] = Base.Alpha[i][k]
 
                 alphaB = Base.Alpha[i][k] / 255
                 alphaU = Upper.Alpha[i][k] / 255
-                if resultant.rgb[i][k][3] == 0:
-                    Rinverse = 0
-                else :
-                    Rinverse = 255 / resultant.rgb[i][k][3]
-
-                for m in range (0, 3) :
-
-                    colorB = (Base.rgb[i][k][m] * alphaB) / 255
-                    colorU = (Upper.rgb[i][k][m] * alphaU) / 255
-
-                    if colorB < 0.5 :
-                        colorR = 2 * colorB * colorU
-                    
+                if Base.mode == 'RGBA' :
+                    if resultant.rgb[i][k][3] == 0:
+                        Rinverse = 0
                     else :
-                        colorR = 1 - (2 * (1 - colorB) * (1 - colorU))
-                    
-                    colorR = int(colorR)
-                    colorR = colorR * 255
-                    resultant.rgb[i][k][m] = colorR * Rinverse
+                        Rinverse = 255 / resultant.rgb[i][k][3]
+                else :
+                    Rinverse = 1
 
-    elif lock == 1 :
+                hslB = cc.RGBtoHSL(Base.rgb[i][k])
+                hslU = cc.RGBtoHSL(Upper.rgb[i][k])
+
+                hslB[1] = hslB[1] * alphaB
+                hslU[1] = hslU[1] * alphaU
+
+                if hslB[2] < 0.5 :
+                    lightR = 2 * hslB[2] * hslU[2]
+                else :
+                    lightR = 1 - (2 * (1 - hslU[2]) * (1 - hslB[2]))
+
+                hslR = hslB
+                hslR[2] = lightR
+                if Base.mode == 'RGBA' :
+                    hslR[3] = resultant.rgb[i][k][3]
+                resultant.rgb[i][k] = cc.HSLtoRGB(hslR)
+
+    elif lock == 1 and Base.mode == 'RGBA':
 
         for v in Base.sparce :
 
@@ -1749,21 +1840,22 @@ def overlay(Upper, Base, lock = 0) :
                 Rinverse = 255 / resultant.rgb[i][k][3]
 
 
-            for m in range (0, 3) :
-                colorB = (Base.rgb[i][k][m] * alphaB) / 255
-                colorU = (Upper.rgb[i][k][m] * alphaU) / 255
+            hslB = cc.RGBtoHSL(Base.rgb[i][k])
+            hslU = cc.RGBtoHSL(Upper.rgb[i][k])
 
+            hslB[1] = hslB[1] * alphaB
+            hslU[1] = hslB[1] * alphaU
 
-                if colorB < 0.5 :
-                    colorR = 2 * colorB * colorU
-                
-                else :
-                    colorR = 1 - (2 * (1 - colorB) * (1 - colorU))
-                
+            if hslB[2] < 0.5 :
+                lightR = 2 * hslB[2] * hslU[2]
+            else :
+                lightR = 1 - (2 * (1 - hslU[2]) * (1 - hslB[2]))
 
-                colorR = int(colorR)
-                colorR = colorR * 255
-                resultant.rgb[i][k][m] = colorR * Rinverse
+            hslR = hslB
+            hslR[2] = lightR
+            hslR[3] = resultant.rgb[i][k][3]
+
+            resultant.rgb[i][k] = cc.HSLtoRGB(hslR)
 
     resultant.Update_image()
 
@@ -1809,41 +1901,48 @@ def screen(Upper, Base, lock = 0) :
 
     resultant = Base
 
-    if lock == 0 :
+    if lock == 0 or Base.mode == 'RGB' :
 
         for i in range(0, length) :
             for k in range(0, height) :
 
                 if Base.Alpha[i][k] < Upper.Alpha[i][k] :
 
-                    resultant.rgb[i][k][3] = Upper.Alpha[i][k]
+                    if Base.mode == 'RGBA' :
+                        resultant.rgb[i][k][3] = Upper.Alpha[i][k]
                     resultant.Alpha[i][k] = Upper.Alpha[i][k]
 
                 else :
-
-                    resultant.rgb[i][k][3] = Base.Alpha[i][k]
+                    
+                    if Base.mode == 'RGBA' :
+                        resultant.rgb[i][k][3] = Base.Alpha[i][k]
                     resultant.Alpha[i][k] = Base.Alpha[i][k]
 
                 alphaB = Base.Alpha[i][k] / 255
                 alphaU = Upper.Alpha[i][k] / 255
-                if resultant.rgb[i][k][3] == 0:
-                    Rinverse = 0
+                if Base.mode == 'RGBA' :
+                    if resultant.rgb[i][k][3] == 0:
+                        Rinverse = 0
+                    else :
+                        Rinverse = 255 / resultant.rgb[i][k][3]
                 else :
-                    Rinverse = 255 / resultant.rgb[i][k][3]
+                    Rinverse = 1
 
-                for m in range (0, 3) :
+                hslB = cc.RGBtoHSL(Base.rgb[i][k])
+                hslU = cc.RGBtoHSL(Upper.rgb[i][k])
 
-                    colorB = (Base.rgb[i][k][m] * alphaB) / 255
-                    colorU = (Upper.rgb[i][k][m] * alphaU) / 255
+                hslB[1] = hslB[1] * alphaB
+                hslU[1] = hslU[1] * alphaU
 
-                    
-                    colorR = colorB + colorU - (colorU * colorB)
-                    
-                    colorR = int(colorR)
-                    colorR = colorR * 255
-                    resultant.rgb[i][k][m] = colorR * Rinverse
+                lightR = 1 - ((1 - hslU[2]) * (1 - hslB[2]))
 
-    elif lock == 1 :
+                hslR = hslB
+                hslR[2] = lightR
+                if Base.mode == 'RGBA' :
+                    hslR[3] = resultant.rgb[i][k][3]
+                resultant.rgb[i][k] = cc.HSLtoRGB(hslR)
+
+    elif lock == 1 and Base.mode == 'RGBA':
 
         for v in Base.sparce :
 
@@ -1866,20 +1965,283 @@ def screen(Upper, Base, lock = 0) :
                 Rinverse = 255 / resultant.rgb[i][k][3]
 
 
-            for m in range (0, 3) :
-                colorB = (Base.rgb[i][k][m] * alphaB) / 255
-                colorU = (Upper.rgb[i][k][m] * alphaU) / 255
+            hslB = cc.RGBtoHSL(Base.rgb[i][k])
+            hslU = cc.RGBtoHSL(Upper.rgb[i][k])
 
+            hslB[1] = hslB[1] * alphaB
+            hslU[1] = hslB[1] * alphaU
 
-                colorR = colorB + colorU - (colorU * colorB)
-                
+            lightR = 1 - ((1 - hslU[2]) * (1 - hslB[2]))
 
-                colorR = int(colorR)
-                colorR = colorR * 255
-                resultant.rgb[i][k][m] = colorR * Rinverse
+            hslR = hslB
+            hslR[2] = lightR
+            hslR[3] = resultant.rgb[i][k][3]
+
+            resultant.rgb[i][k] = cc.HSLtoRGB(hslR)
+
 
     resultant.Update_image()
 
     return resultant
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def red(Upper , Base, lock = 0) :
+
+
+    if Upper == None and Base != None:
+
+        return Base
+
+    if Base == None and Upper != None :
+
+        return Upper
+
+    if Base == None and Upper == None :
+
+        return None
+
+
+
+    if Base.dimension[0] < Upper.dimension[0] :
+        length = Base.dimension[0]
+    else :
+        length = Upper.dimension[0]
+
+    if Base.dimension[1] < Upper.dimension[1] :
+        height = Base.dimension[1]
+    else :
+        height = Upper.dimension[1]
+
+    resultant = Base
+
+    if lock == 0 or Base.mode == 'RGB' :
+
+        for i in range(0, length) :
+            for k in range(0, height) :
+
+                if Base.Alpha[i][k] < Upper.Alpha[i][k] :
+
+                    if Base.mode == 'RGBA' :
+                        resultant.rgb[i][k][3] = Upper.Alpha[i][k]
+                    resultant.Alpha[i][k] = Upper.Alpha[i][k]
+
+                else :
+                    
+                    if Base.mode == 'RGBA' :
+                        resultant.rgb[i][k][3] = Base.Alpha[i][k]
+                    resultant.Alpha[i][k] = Base.Alpha[i][k]
+
+                alphaB = Base.Alpha[i][k] / 255
+                alphaU = Upper.Alpha[i][k] / 255
+                if Base.mode == 'RGBA' :
+                    if resultant.rgb[i][k][3] == 0:
+                        Rinverse = 0
+                    else :
+                        Rinverse = 255 / resultant.rgb[i][k][3]
+                else :
+                    Rinverse = 1
+
+
+                hslR = Base.rgb[i][k]
+                hslR[0] = Upper.rgb[i][k][0] * alphaU
+                hslR[1] = hslR[1] * alphaB
+                hslR[2] = hslR[2] * alphaB
+                if Base.mode == 'RGBA' :
+                    hslR[3] = resultant.rgb[i][k][3]
+
+                resultant[i][k] = hslR
+
+    elif lock == 1 and Base.mode == 'RGBA':
+
+        for v in Base.sparce :
+
+            i = v[0]
+            k = v[1]
+
+            resultant.rgb[i][k] = Base.rgb[i][k]
+
+
+            if i > length or k > height:
+
+                continue
+
+            alphaB = Base.Alpha[i][k] / 255
+            alphaU = Upper.Alpha[i][k] / 255
+
+            if resultant.rgb[i][k][3] == 0:
+                Rinverse = 0
+            else :
+                Rinverse = 255 / resultant.rgb[i][k][3]
+
+
+            hslR = Base.rgb[i][k]
+            hslR[0] = Upper.rgb[i][k][0] * alphaU
+            hslR[1] = hslR[1] * alphaB
+            hslR[2] = hslR[2] * alphaB
+            hslR[3] = resultant.rgb[i][k][3]
+
+            resultant[i][k] = hslR
+
+
+    resultant.Update_image()
+
+    return resultant
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def green(Upper , Base, lock = 0) :
+
+
+    if Upper == None and Base != None:
+
+        return Base
+
+    if Base == None and Upper != None :
+
+        return Upper
+
+    if Base == None and Upper == None :
+
+        return None
+
+
+
+    if Base.dimension[0] < Upper.dimension[0] :
+        length = Base.dimension[0]
+    else :
+        length = Upper.dimension[0]
+
+    if Base.dimension[1] < Upper.dimension[1] :
+        height = Base.dimension[1]
+    else :
+        height = Upper.dimension[1]
+
+    resultant = Base
+
+    if lock == 0 or Base.mode == 'RGB' :
+
+        for i in range(0, length) :
+            for k in range(0, height) :
+
+                if Base.Alpha[i][k] < Upper.Alpha[i][k] :
+
+                    if Base.mode == 'RGBA' :
+                        resultant.rgb[i][k][3] = Upper.Alpha[i][k]
+                    resultant.Alpha[i][k] = Upper.Alpha[i][k]
+
+                else :
+                    
+                    if Base.mode == 'RGBA' :
+                        resultant.rgb[i][k][3] = Base.Alpha[i][k]
+                    resultant.Alpha[i][k] = Base.Alpha[i][k]
+                        
+                alphaB = Base.Alpha[i][k] / 255
+                alphaU = Upper.Alpha[i][k] / 255
+                if Base.mode == 'RGBA' :
+                    if resultant.rgb[i][k][3] == 0:
+                        Rinverse = 0
+                    else :
+                        Rinverse = 255 / resultant.rgb[i][k][3]
+                else :
+                    Rinverse = 1
+
+
+                hslR = Base.rgb[i][k]
+                hslR[0] = hslR[0] * alphaB
+                hslR[1] = Upper.rgb[i][k][1] * alphaU
+                hslR[2] = hslR[2] * alphaB
+                if Base.mode == 'RGBA' :
+                    hslR[3] = resultant.rgb[i][k][3]
+
+                resultant[i][k] = hslR
+
+    elif lock == 1 and Base.mode == 'RGBA':
+
+        for v in Base.sparce :
+
+            i = v[0]
+            k = v[1]
+
+            resultant.rgb[i][k] = Base.rgb[i][k]
+
+
+            if i > length or k > height:
+
+                continue
+
+            alphaB = Base.Alpha[i][k] / 255
+            alphaU = Upper.Alpha[i][k] / 255
+
+            if resultant.rgb[i][k][3] == 0:
+                Rinverse = 0
+            else :
+                Rinverse = 255 / resultant.rgb[i][k][3]
+
+
+            hslR = Base.rgb[i][k]
+            hslR[0] = hslR[0] * alphaB
+            hslR[1] = Upper.rgb[i][k][1] * alphaU
+            hslR[2] = hslR[2] * alphaB
+            hslR[3] = resultant.rgb[i][k][3]
+
+            resultant[i][k] = hslR
+
+
+    resultant.Update_image()
+
+    return resultant
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
